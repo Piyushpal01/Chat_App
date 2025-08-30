@@ -7,7 +7,7 @@ from .forms import *
 @login_required
 def chat_view(request):
     # retrieve caht grp
-    chat_group = get_object_or_404(ChatGroup, group_name="Private Chat") 
+    chat_group = get_object_or_404(ChatGroup, group_name="public-chat") 
     
     # retrieve its messages
     chat_messages = chat_group.chat_messages.all()[:30] # fetching only last 30 
