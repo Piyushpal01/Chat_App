@@ -18,6 +18,13 @@ class ChatroomConsumer(WebsocketConsumer):
             self.channel_name
         )
 
+        # add and update online users
+        # first chk if current user is not online yet
+        if self.user not in self.chatroom.online_users.all():
+            # add user
+            self.chatroom.online_users.add(self.user)
+            self.update_online_count()  # fn to update online count of group in all browsers
+
         self.accept()
 
     # disconnect method, so whenver channel disconnect - leave group
@@ -25,6 +32,12 @@ class ChatroomConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_discard)(
             self.chatroom_name, self.channel_name
         )
+
+        # rempve and update online users
+        if self.user in self.chatroom.online_users.all():
+            # aremove user
+            self.chatroom.online_users.remove(self.user)
+            self.update_online_count()  # fn to update online count of group in all browsers
 
     # receive mthd which receive data from form
     def receive(self, text_data):
@@ -59,4 +72,22 @@ class ChatroomConsumer(WebsocketConsumer):
         }
         html = render_to_string("a_rtchat/partials/chat_message_p.html", context=context)
         self.send(text_data=html) # send to frontend
+
+    # fn to count users
+    def update_online_count(self):
+        # count how many users we have in this chatroom
+        online_count = self.chatroom.online_users.count() -1    # -1, so that if there is no user, for not confusing, removing that 1 online
+
+        # then we broadcast this number to all members this chatroom 
+        event = {
+            'type':'online_count_handler',
+            'online_count':online_count
+        }
+        async_to_sync(self.channel_layer.group_send)(
+            self.chatroom_name, event
+        )
     
+    def online_count_handler(self, event):
+        online_count = event['online_count']
+        html = render_to_string("a_rtchat/partials/online_count.html", {'online_count': online_count})
+        self.send(text_data=html)   # send back to client

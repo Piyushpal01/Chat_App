@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 # Create your models here.
 class ChatGroup(models.Model):
     group_name = models.CharField(max_length=130, unique=True)
+    # to count users
+    online_users = models.ManyToManyField(User, blank=True, related_name="online_users_in_group") 
 
     def __str__(self):
         return self.group_name
