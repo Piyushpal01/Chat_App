@@ -6,21 +6,78 @@
             <span class="text-lg font-bold">Realtime ChatApp</span>
         </a>
     </div>
+    
     <nav class="block relative">
         <ul class="navitems flex items-center justify-center h-full">
+            
             {% if request.user.is_authenticated %}
-            <li><a href="/">Home</a></li>
-            <li x-data="{ dropdownOpen: false }" class="relative">
-                <a @click="dropdownOpen = !dropdownOpen" @click.away="dropdownOpen = false" class="cursor-pointer select-none">
+            
+            <!-- 🔽 Chats Dropdown -->
+            <li x-data="{ openChatDropdown: false }" class="relative">
+                <a @click="openChatDropdown = !openChatDropdown" @click.away="openChatDropdown = false"
+                   class="cursor-pointer select-none flex items-center gap-1">
+                    Chats
+                    <img :class="openChatDropdown && 'rotate-180 duration-300'" class="w-3 h-3 transition-transform"
+                         src="https://img.icons8.com/small/32/ffffff/expand-arrow.png" alt="Dropdown"/>
+                </a>
+
+                <div x-show="openChatDropdown"
+                     x-cloak
+                     class="absolute left-0 mt-2 bg-white text-black shadow-lg rounded-lg w-60 p-2 z-50"
+                     x-transition:enter="duration-300 ease-out"
+                     x-transition:enter-start="opacity-0 -translate-y-5 scale-90"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+
+                    <!-- Public Chat -->
+                    <ul class="hoverlist mb-2">
+                        <li>
+                            <a href="{% url 'home' %}" class="block px-2 py-1 hover:bg-gray-100 rounded">
+                                🟢 Public Chat
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Divider -->
+                    <hr class="my-2 border-t border-gray-300">
+
+                    <!-- 🔒 Private Chats -->
+                    <div class="mb-1 px-2 text-sm font-semibold text-gray-600">Private Chats</div>
+                    <ul class="hoverlist">
+                        {% for chatroom in user.chat_groups.all %}
+                            {% if chatroom.is_private %}
+                                {% for member in chatroom.members.all %}
+                                    {% if member != request.user %}
+                                        <li>
+                                            <a href="{% url 'chatroom' chatroom.group_name %}"
+                                               class="block px-2 py-1 hover:bg-gray-100 rounded">
+                                                {{ member.profile.name }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+
+                </div>
+            </li>
+
+            <!-- 👤 User Profile Dropdown -->
+            <li x-data="{ dropdownOpen: false }" class="relative ml-4">
+                <a @click="dropdownOpen = !dropdownOpen" @click.away="dropdownOpen = false"
+                   class="cursor-pointer select-none flex items-center gap-1">
                     <img class="h-8 w-8 rounded-full object-cover" src="{{ request.user.profile.avatar }}" alt="Avatar" />
                     {{ request.user.profile.name }}
-                    <img x-bind:class="dropdownOpen && 'rotate-180 duration-300'" class="w-4" src="https://img.icons8.com/small/32/ffffff/expand-arrow.png" alt="Dropdown" />
+                    <img x-bind:class="dropdownOpen && 'rotate-180 duration-300'" class="w-4"
+                         src="https://img.icons8.com/small/32/ffffff/expand-arrow.png" alt="Dropdown" />
                 </a>
-                <div x-show="dropdownOpen" x-cloak class="absolute right-0 bg-white text-black shadow rounded-lg w-40 p-2 z-20"
-                x-transition:enter="duration-300 ease-out"
-                x-transition:enter-start="opacity-0 -translate-y-5 scale-90"
-                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                >
+                <div x-show="dropdownOpen"
+                     x-cloak
+                     class="absolute right-0 mt-2 bg-white text-black shadow rounded-lg w-40 p-2 z-20"
+                     x-transition:enter="duration-300 ease-out"
+                     x-transition:enter-start="opacity-0 -translate-y-5 scale-90"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+
                     <ul class="hoverlist [&>li>a]:justify-end">
                         <li><a href="{% url 'profile' %}">My Profile</a></li>
                         <li><a href="{% url 'profile-edit' %}">Edit Profile</a></li>
@@ -29,10 +86,10 @@
                     </ul>
                 </div>
             </li>
-            
+
             {% else %}
-            <li><a href="{% url 'account_login' %}">Login</a></li>
-            <li><a href="{% url 'account_signup' %}?next={% url 'profile-onboarding' %}">Signup</a></li>
+                <li><a href="{% url 'account_login' %}">Login</a></li>
+                <li><a href="{% url 'account_signup' %}?next={% url 'profile-onboarding' %}">Signup</a></li>
             {% endif %}
         </ul>
     </nav>
