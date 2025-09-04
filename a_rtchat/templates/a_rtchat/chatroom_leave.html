@@ -1,0 +1,76 @@
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal-content">
+    <h2>Leave this chatroom?</h2>
+    <p>"{{ chat_group.groupchat_name }}"</p>
+
+    <form 
+        method="POST"
+        hx-post="{% url 'leave-chatroom' chat_group.group_name %}" 
+        hx-target="this" 
+        hx-swap="outerHTML"
+    >
+      {% csrf_token %}
+      <button type="submit" class="button-red mt-4">Yes, leave</button>
+      <button type="button" class="button-gray ml-2" onclick="closeModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function closeModal() {
+    const modal = document.getElementById("leaveModal");
+    if (modal) modal.remove();
+  }
+</script>
+
+<style>
+  /* Overlay */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.5); /* black transparent overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  /* Modal box */
+  .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+
+  /* Button styles (optional — use your existing classes if needed) */
+  .button-red {
+    background-color: #e3342f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .button-gray {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .mt-4 {
+    margin-top: 1rem;
+  }
+
+  .ml-2 {
+    margin-left: 0.5rem;
+  }
+</style>

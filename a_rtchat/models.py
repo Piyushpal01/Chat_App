@@ -5,6 +5,8 @@ import shortuuid
 # Create your models here.
 class ChatGroup(models.Model):
     group_name = models.CharField(max_length=130, unique=True, default=shortuuid.uuid)
+    groupchat_name = models.CharField(max_length=128, null=True, blank=False)
+    admin = models.ForeignKey(User, related_name="groupchats", blank=True, null=True, on_delete=models.SET_NULL)
     # to count users
     online_users = models.ManyToManyField(User, blank=True, related_name="online_users_in_group") 
     members = models.ManyToManyField(User, related_name="chat_groups", blank=True)

@@ -1,5 +1,5 @@
 {% load static %}
-<header class="flex items-center justify-between bg-gray-800 h-20 px-8 text-white sticky top-0 z-40">
+<header class="flex items-center justify-between bg-gray-800 h-16 px-8 text-white sticky top-0 z-40">
     <div>
         <a class="flex items-center gap-2" href="/">
             <img class="h-6" src="{% static 'images/logo.svg' %}" alt="Logo"/>
@@ -35,6 +35,14 @@
                                 🟢 Public Chat
                             </a>
                         </li>
+                        <!-- Divider -->
+                        <hr class="my-2 border-t border-gray-300">
+                        <div class="mb-1 px-2 text-sm font-semibold text-gray-600">Groups</div>
+                        {% for chatroom in user.chat_groups.all %}
+                            {% if chatroom.groupchat_name %}
+                                <li><a href="{% url "chatroom" chatroom.group_name %}" class="leading-5">{{ chatroom.groupchat_name|slice:":30" }}</a></li>
+                            {% endif %}
+                        {% endfor %}
                     </ul>
 
                     <!-- Divider -->
@@ -81,6 +89,7 @@
                     <ul class="hoverlist [&>li>a]:justify-end">
                         <li><a href="{% url 'profile' %}">My Profile</a></li>
                         <li><a href="{% url 'profile-edit' %}">Edit Profile</a></li>
+                        <li><a href="{% url 'new-groupchat' %}">Create Group</a></li>
                         <li><a href="{% url 'profile-settings' %}">Settings</a></li>
                         <li><a href="{% url 'account_logout' %}">Log Out</a></li>
                     </ul>

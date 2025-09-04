@@ -19,4 +19,23 @@
     <div id="online_icon" class="gray-dot absolute top-2 left-2"></div>
 {% endif %}
 
+{% comment %} groupchat-members {% endcomment %}
+<ul id="groupchat_members" class="flex gap-4">
+    {% for member in chat_group.members.all %}
+        <li>
+            <a href="{% url "profile" member.username %}" class="flex flex-col justify-center items-center text-gray-400 w-20 gap-2">
+                <div class="relative">
+                    {% if member in chat_group.online_users.all %}
+                        <div class="green-dot border-2 border-gray-800 absolute bottom-0 right-0"></div>
+                    {% else %}
+                        <div class="gray-dot border-2 border-gray-800 absolute bottom-0 right-0"></div>
+                    {% endif %}
+                    <img src="{{ member.profile.avatar }}" class="w-12 h-12 rounded-full object-cover">
+                </div>
+                {{ member.profile.name|slice:":10" }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+
 

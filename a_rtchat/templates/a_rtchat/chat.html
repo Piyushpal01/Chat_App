@@ -4,8 +4,25 @@
 
 {% comment %} <div>{{chatroom_name}}</div> {% endcomment %}
 
-<wrapper class="block max-w-2xl mx-auto my-10 px-6">
-        <div id="chat_window" class="h-[45rem] flex flex-col bg-gray-800 rounded-2xl shadow-2xl relative p-1">
+<wrapper class="block max-w-2xl mx-auto my-5 px-6">
+    {% if chat_group.groupchat_name %}
+        <div class="flex justify-between">
+            <h2>{{ chat_group.groupchat_name }}</h2>
+            
+            {% comment %} if user is admin then giving edit link to the user of the grp {% endcomment %}
+            {% if user == chat_group.admin %}
+                <a href="{% url "edit-chatroom" chat_group.group_name %}">
+                    {% comment %} edit icon {% endcomment %}
+                    <div class="p-2 bg-gray-200 hover:bg-blue-600 rounded-lg group">
+                    <svg class="fill-gray-500 group-hover:fill-white" width="16" height="16">
+                        <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                    </svg>
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+        <div id="chat_window" class="h-[34rem] flex flex-col bg-gray-800 rounded-2xl shadow-2xl relative p-1">
             <div class="flex justify-center text-emerald-400 bg-gray-800 p-2 sticky top-0 z-10">
 
                 {% if other_user %}
@@ -19,6 +36,17 @@
                             </div>
                         </div>
                     </a>
+                {% elif chat_group.groupchat_name %}
+                    <ul id="groupchat_members" class="flex gap-4">
+                        {% for member in chat_group.members.all %}
+                            <li>
+                                <a href="{% url "profile" member.username %}" class="flex flex-col justify-center items-center tezt-gray-400 w-20 gap-2">
+                                    <img src="{{ member.profile.avatar }}" class="w-14 h-14 rounded-full object-cover">
+                                    {{ member.profile.name|slice:":10" }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
                     <div id="online_icon"></div>
                     {% comment %} getting count from backend variable included in online_count.html {% endcomment %}
@@ -26,7 +54,7 @@
                 {% endif %}
             
             </div>
-            <div id='chat_container' class="overflow-y-auto grow">
+            <div id='chat_container' class="overflow-y-scroll grow hide-scrollbar">
                 <ul id='chat_messages' class="flex flex-col justify-end gap-2 p-4">
                     {% for message in chat_messages reversed %}
                         {% include "a_rtchat/chat_message.html" %}
@@ -50,7 +78,30 @@
                 </div>
             </div>
         </div>
+        
+        {% comment %} Leave chatroom {% endcomment %}
+        {% if chat_group.members.exists %}
+        <button 
+            hx-get="{% url 'leave-chatroom' chat_group.group_name %}" 
+            hx-target="body" 
+            hx-swap="beforeend" {% comment %} response body me inject karo, isse modal usi page pr inject hjaega {% endcomment %}
+            class="py-2 px-3 rounded-md mx-auto mt-3 flex font-semibold cursor-pointer bg-red-500 hover:bg-red-600 "
+        >
+        Leave Chatroom
+        </button>
+        {% endif %}
     </wrapper>
+
+{% comment %} hiding scrollbar in chat window {% endcomment %}
+<style>
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+</style>
 {% endblock %}
 
 {% comment %} js to automatic scroll to last msg {% endcomment %}
@@ -58,8 +109,26 @@
 <script>
     function scrollToBottom() {
         const container = document.getElementById('chat_container');
+        if (!container) return;
         container.scrollTop = container.scrollHeight;
     }
-    scrollToBottom();
+
+    // Page load
+    window.addEventListener('load', scrollToBottom);
+
+    // Jab HTMX koi cheez replace/add kare
+    document.body.addEventListener('htmx:afterSwap', (event) => {
+        scrollToBottom();
+    });
+
+    // Jab WebSocket message send ho
+    document.body.addEventListener('htmx:wsAfterMessage', (event) => {
+        scrollToBottom();
+    });
+
+    // Optional: jab message bhej diya jaye
+    document.body.addEventListener('htmx:wsAfterSend', () => {
+        scrollToBottom();
+    });
 </script>
 {% endblock %}
