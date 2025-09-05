@@ -100,6 +100,12 @@
                 <li><a href="{% url 'account_login' %}">Login</a></li>
                 <li><a href="{% url 'account_signup' %}?next={% url 'profile-onboarding' %}">Signup</a></li>
             {% endif %}
+            <!-- Dark Mode Toggle Button -->
+            <li class="ml-6 flex items-center">
+                <button id="theme-toggle" class="text-xl bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg transition-colors">
+                    🌙
+                </button>
+            </li>
         </ul>
     </nav>
 </header>

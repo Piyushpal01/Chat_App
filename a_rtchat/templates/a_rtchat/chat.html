@@ -4,10 +4,10 @@
 
 {% comment %} <div>{{chatroom_name}}</div> {% endcomment %}
 
-<wrapper class="block max-w-2xl mx-auto my-5 px-6">
+<wrapper class="block max-w-2xl mx-auto my-5 px-6 dark:text-black">
     {% if chat_group.groupchat_name %}
         <div class="flex justify-between">
-            <h2>{{ chat_group.groupchat_name }}</h2>
+            <h2 class="dark:text-white">{{ chat_group.groupchat_name }}</h2>
             
             {% comment %} if user is admin then giving edit link to the user of the grp {% endcomment %}
             {% if user == chat_group.admin %}
@@ -21,6 +21,8 @@
                 </a>
             {% endif %}
         </div>
+    {% else %}
+            <h2 class="dark:text-white">Public Room</h2>
     {% endif %}
         <div id="chat_window" class="h-[34rem] flex flex-col bg-gray-800 rounded-2xl shadow-2xl relative p-1">
             <div class="flex justify-center text-emerald-400 bg-gray-800 p-2 sticky top-0 z-10">
@@ -46,7 +48,7 @@
                                 </a>
                             </li>
                         {% endfor %}
-                    </ul>
+                    </ul>    
                 {% else %}
                     <div id="online_icon"></div>
                     {% comment %} getting count from backend variable included in online_count.html {% endcomment %}
@@ -62,7 +64,7 @@
                 </ul>
             </div>
             <div class="sticky bottom-0 z-10 p-2 bg-gray-800">
-                <div class="flex items-center rounded-xl px-2 py-2">
+                <div class="flex flex-col gap-4 items-center rounded-xl px-2 py-2">
                     {% comment %} adding htmx so that only new message get added without refreshing the whole page {% endcomment %}
                     <form id="chat_message_form" class="w-full"
                         hx-ext="ws"
@@ -75,10 +77,20 @@
                         {% csrf_token %}
                         {{ form }}
                     </form>
+                    {% comment %} form for sending files {% endcomment %}
+                    <form id="chat_file_form" enctype="multipart/form-data" class="flex items-center w-full"
+                        hx-post="{% url "chat-file-upload" chat_group.group_name %}"
+                        hx-target="#chat_messages"
+                        hx-swap="beforeend"
+                        _="on htmx:beforeSend reset() me"
+                    >
+                        {% csrf_token %}
+                        <input type="file" name="file" id="id_file" class="!bg-transparent text-gray-400">
+                        <button type="submit" class="whitespace-nowrap !text-sm h-fit">Send File</button>
+                    </form>
                 </div>
             </div>
-        </div>
-        
+        </div>        
         {% comment %} Leave chatroom {% endcomment %}
         {% if chat_group.members.exists %}
         <button 
@@ -107,7 +119,7 @@
 {% comment %} js to automatic scroll to last msg {% endcomment %}
 {% block javascript %}
 <script>
-    function scrollToBottom() {
+    function scrollToBottom(time=0) {
         const container = document.getElementById('chat_container');
         if (!container) return;
         container.scrollTop = container.scrollHeight;

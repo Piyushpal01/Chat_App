@@ -16,6 +16,14 @@
     {% django_htmx_script %}
     <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+        extend: {}
+        }
+    }
+    </script>
     <style type="text/tailwindcss">
         [x-cloak] { 
             display: none !important; 
@@ -116,7 +124,7 @@
         }
     </style>
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="{% block class %}{% endblock %}">
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="{% block class %}{% endblock %} bg-white text-black dark:bg-gray-900 dark:text-white transition-colors duration-300">
 	
     {% include 'includes/messages.html' %}
 
@@ -126,6 +134,34 @@
     {% endblock %}
 
     {% block javascript %}{% endblock %}
+
+    
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const themeToggle = document.getElementById("theme-toggle");
+    const htmlEl = document.documentElement;
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      htmlEl.classList.add("dark");
+      if (themeToggle) themeToggle.textContent = "🌞";
+    } else {
+      htmlEl.classList.remove("dark");
+      if (themeToggle) themeToggle.textContent = "🌙";
+    }
+
+    // Toggle theme on click
+    if (themeToggle) {
+      themeToggle.addEventListener("click", () => {
+        htmlEl.classList.toggle("dark");
+        const isDark = htmlEl.classList.contains("dark");
+        themeToggle.textContent = isDark ? "🌞" : "🌙";
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
+    }
+  });
+</script>
 
 </body>
 </html>
